@@ -3,6 +3,7 @@ No legacy application/database is required to run the deterministic core.
 """
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from antibiotic_agent_schema import Severity, SuspectedSource, RiskFactors
@@ -19,6 +20,13 @@ MEMORY_PATH = os.environ.get("MEMORY_PATH", str(BASE / "memory.jsonl"))
 FRONTEND_DIR = BASE.parent / "frontend"
 
 app = FastAPI(title="Sepsis Bundle — Five Agent Clinical Decision Support", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://sepsis-multi-agent-system.vercel.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/", include_in_schema=False)
 def frontend():
