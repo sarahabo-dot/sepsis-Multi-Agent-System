@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+backend/kb_versions/*.json
+backend/kb_versions/active_pointer.json
+backend/memory.jsonl
+backend/audit_trail.jsonl
+!backend/audit_trail.jsonl

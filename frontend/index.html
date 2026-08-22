@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#060a12" />
+  <title>Sepsis Bundle | ICU Clinical Decision Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span></span><span></span><span></span></div>
+        <div><strong>Sepsis <em>Bundle</em></strong><small>ICU Clinical Decision Support</small></div>
+      </div>
+      <div class="arch-line"></div>
+      <nav>
+        <button class="nav-item active" data-view="assessment"><span>01</span> Assessment</button>
+        <button class="nav-item" data-view="governance"><span>02</span> Governance</button>
+        <button class="nav-item" data-view="memory"><span>03</span> Memory & Analytics</button>
+        <button class="nav-item" data-view="architecture"><span>04</span> Five-Agent System</button>
+      </nav>
+      <div class="sidebar-footer mono">
+        <div>ACEQUIA MODEL</div>
+        <div id="kbVersion">KB — checking</div>
+        <div id="healthStatus">SYSTEM — checking</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><span class="eyebrow mono">FIVE AGENTS · ONE CHANNEL</span><h1 id="pageTitle">Clinical Assessment</h1></div>
+        <div class="physician-chip"><i></i> PHYSICIAN DECIDES</div>
+      </header>
+
+      <section id="assessment" class="view active">
+        <div class="grid assessment-grid">
+          <div class="panel intake">
+            <div class="panel-head"><div><span class="section-kicker mono">CASE INPUT</span><h2>Patient assessment</h2></div><span class="agent-badge">ORCHESTRATOR</span></div>
+            <form id="assessmentForm">
+              <div class="form-grid">
+                <label>Case ID<input name="case_id" value="CASE-2026-001" required /></label>
+                <label>Patient ID<input name="patient_id" placeholder="Hospital pseudonym" required /></label>
+                <label>Severity<select name="severity"><option value="sepsis">Sepsis</option><option value="septic_shock" selected>Septic shock</option></select></label>
+                <label>Suspected source<select name="suspected_source"><option value="urinary">Urinary</option><option value="pulmonary">Pulmonary</option><option value="abdominal">Abdominal</option><option value="skin_soft_tissue">Skin / soft tissue</option><option value="cns">CNS</option><option value="undifferentiated">Undifferentiated</option></select></label>
+              </div>
+              <div class="subhead">SOFA inputs</div>
+              <div class="form-grid compact">
+                <label>PaO₂ / FiO₂<input type="number" step="0.1" name="pao2_fio2" placeholder="optional" /></label>
+                <label>Platelets (×10⁹/L)<input type="number" step="0.1" name="platelets" placeholder="optional" /></label>
+                <label>Bilirubin (mg/dL)<input type="number" step="0.1" name="bilirubin" placeholder="optional" /></label>
+                <label>MAP (mmHg)<input type="number" step="0.1" name="map_mmhg" placeholder="optional" /></label>
+                <label>GCS<input type="number" step="1" name="gcs" min="3" max="15" placeholder="optional" /></label>
+                <label>Creatinine (mg/dL)<input type="number" step="0.1" name="creatinine" min="0" placeholder="optional" /></label>
+                <label>Urine output (mL/24h)<input type="number" step="1" name="urine_output_24h" min="0" placeholder="optional" /></label>
+                <label>Weight (kg)<input type="number" step="0.1" name="weight_kg" min="0" placeholder="optional" /></label>
+              </div>
+              <div class="subhead">Risk modifiers</div>
+              <div class="checks">
+                <label><input type="checkbox" name="mdr" value="prior_mdr_colonization" /> MDR risk</label>
+                <label><input type="checkbox" name="mrsa" value="prior_mrsa_colonization" /> MRSA risk</label>
+                <label><input type="checkbox" name="anaerobic" value="bowel_perforation" /> Anaerobic risk</label>
+                <label><input type="checkbox" name="fungal" value="prolonged_broad_spectrum_use" /> Fungal risk</label>
+              </div>
+              <label>Documented allergies<input name="allergies" placeholder="e.g. penicillin; vancomycin (leave blank if none)" /></label>
+              <div class="form-actions"><button class="primary" type="submit"><span>Run governed assessment</span><b>→</b></button><button class="ghost" type="reset">Reset</button></div>
+            </form>
+            <div id="assessmentError" class="alert error hidden"></div>
+          </div>
+
+          <div class="panel flow-panel">
+            <div class="panel-head"><div><span class="section-kicker mono">LIVE PIPELINE</span><h2>Agent convergence</h2></div><span class="live-dot">LIVE</span></div>
+            <div class="flow">
+              <div class="flow-node"><b>01</b><strong>Sepsis Bundle</strong><small>SOFA + orchestration</small></div>
+              <div class="flow-node"><b>02</b><strong>Antibiotic</strong><small>deterministic rules</small></div>
+              <div class="flow-node"><b>03</b><strong>Guideline</strong><small>surveillance / updates</small></div>
+              <div class="flow-node"><b>04</b><strong>Governance</strong><small>validate + audit</small></div>
+              <div class="flow-node"><b>05</b><strong>Memory</strong><small>context + analytics</small></div>
+              <div class="basin"><span></span><strong>PHYSICIAN DECIDES</strong><small>AI proposes · clinician approves</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultPanel" class="panel result-panel hidden">
+          <div class="panel-head"><div><span class="section-kicker mono">GOVERNED OUTPUT</span><h2>Assessment result</h2></div><span id="resultStatus" class="status-pill">—</span></div>
+          <div class="result-grid">
+            <div class="score-card"><span class="section-kicker mono">SOFA</span><strong id="sofaScore">—</strong><small>calculated independently of antibiotic path</small></div>
+            <div class="result-card"><span class="section-kicker mono">ANTIBIOTIC</span><div id="antibioticResult">No result yet.</div></div>
+            <div class="result-card"><span class="section-kicker mono">GOVERNANCE</span><div id="governanceResult">No governance decision yet.</div></div>
+          </div>
+          <details><summary>Structured response / audit transparency</summary><pre id="rawResult"></pre></details>
+        </div>
+      </section>
+
+      <section id="governance" class="view">
+        <div class="page-intro"><span class="section-kicker mono">SAFETY CONTROL PLANE</span><h2>Governance</h2><p>The UI never promotes a clinical recommendation. It displays the backend governance decision, violations, warnings, and knowledge-base provenance.</p></div>
+        <div class="governance-grid">
+          <div class="panel policy-card"><span class="policy-icon">01</span><h3>Fail closed</h3><p>Blocked antibiotic outputs do not cross the governance boundary.</p></div>
+          <div class="panel policy-card"><span class="policy-icon">02</span><h3>Immutable KB</h3><p>Guideline versions are published as new versions; existing versions are never overwritten.</p></div>
+          <div class="panel policy-card"><span class="policy-icon">03</span><h3>Human approval</h3><p>Guideline surveillance creates pending review records rather than activating changes.</p></div>
+          <div class="panel policy-card"><span class="policy-icon">04</span><h3>Audit trail</h3><p>Case assessment and governance events are recorded for traceability.</p></div>
+        </div>
+        <div class="panel matrix"><div class="panel-head"><div><span class="section-kicker mono">POLICY MATRIX</span><h2>Decision boundary</h2></div></div><table><thead><tr><th>Control</th><th>PASS</th><th>WARNING</th><th>BLOCK</th></tr></thead><tbody><tr><td>Antibiotic response</td><td>Allowed</td><td>Allowed with warning</td><td>Not exposed</td></tr><tr><td>Guideline update</td><td>—</td><td>Pending review</td><td>Not activated</td></tr><tr><td>Missing critical input</td><td>—</td><td>Flag</td><td>Escalate / no silent guess</td></tr><tr><td>Provenance</td><td>Versioned</td><td>Review required</td><td>Unverified source blocked</td></tr></tbody></table></div>
+      </section>
+
+      <section id="memory" class="view">
+        <div class="page-intro"><span class="section-kicker mono">AGENT 05</span><h2>Memory & Clinical Analytics</h2><p>Only aggregate, de-identified metrics are displayed here. Patient identifiers are not rendered in the analytics dashboard.</p></div>
+        <div id="analyticsCards" class="stats-grid"><div class="stat-card"><span>Cases</span><strong>—</strong></div><div class="stat-card"><span>Governance pass</span><strong>—</strong></div><div class="stat-card"><span>Blocked</span><strong>—</strong></div><div class="stat-card"><span>Mean SOFA</span><strong>—</strong></div></div>
+        <div class="panel analytics-table"><div class="panel-head"><div><span class="section-kicker mono">AGGREGATE VIEW</span><h2>System memory</h2></div><button class="ghost" id="refreshAnalytics">Refresh</button></div><pre id="analyticsRaw">Loading analytics…</pre></div>
+      </section>
+
+      <section id="architecture" class="view">
+        <div class="page-intro"><span class="section-kicker mono">ACEQUIA MODEL · v0.1</span><h2>Five-agent architecture</h2><p>Independent agents converge through a governed channel. The system is designed around provenance, deterministic clinical rules, controlled memory, and explicit physician authority.</p></div>
+        <div class="architecture-canvas">
+          <div class="arch-agent a1"><b>01</b><strong>SEPSIS BUNDLE</strong><small>SOFA / orchestration</small></div>
+          <div class="arch-agent a2"><b>02</b><strong>ANTIBIOTIC</strong><small>regimen + dosing</small></div>
+          <div class="arch-agent a3"><b>03</b><strong>GUIDELINE SURVEILLANCE</strong><small>licensed sources / review</small></div>
+          <div class="arch-agent a4"><b>04</b><strong>GOVERNANCE</strong><small>validation / audit</small></div>
+          <div class="arch-agent a5"><b>05</b><strong>MEMORY</strong><small>longitudinal analytics</small></div>
+          <div class="arch-basin"><strong>PHYSICIAN DECIDES</strong><small>One decision point · no autonomous treatment</small></div>
+        </div>
+      </section>
+
+      <footer class="footer mono">GOVERNANCE-AUDITED · MEMORY-INFORMED · AI PROPOSES · PHYSICIAN DECIDES <span>v0.1.0</span></footer>
+    </main>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

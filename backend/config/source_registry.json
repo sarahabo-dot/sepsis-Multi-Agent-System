@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "id": "primary_sepsis_guideline",
+      "name": "Institution-approved sepsis antimicrobial guideline",
+      "acquisition_method": "licensed_feed_or_manual_review",
+      "license_status": "VERIFY_BEFORE_PRODUCTION_USE"
+    }
+  ]
+}

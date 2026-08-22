@@ -1,0 +1,44 @@
+{
+  "architecture": "five_agent_governed_sepsis",
+  "version": "0.1.0",
+  "agents": [
+    {
+      "id": 1,
+      "name": "Sepsis Bundle Agent / Orchestrator",
+      "runtime": "realtime",
+      "clinical_authority": "SOFA_and_bundle"
+    },
+    {
+      "id": 2,
+      "name": "Antibiotic Specialist Agent",
+      "runtime": "realtime",
+      "clinical_authority": "deterministic_KB_regimen"
+    },
+    {
+      "id": 3,
+      "name": "Guideline Surveillance Agent",
+      "runtime": "scheduled_background",
+      "clinical_authority": "none_pending_review_only"
+    },
+    {
+      "id": 4,
+      "name": "Memory & Clinical Analytics Agent",
+      "runtime": "longitudinal",
+      "clinical_authority": "none"
+    },
+    {
+      "id": 5,
+      "name": "Governance / Safety Monitor",
+      "runtime": "synchronous_gate",
+      "clinical_authority": "validation_only"
+    }
+  ],
+  "hard_rules": [
+    "LLM output cannot create a trusted drug/dose/frequency",
+    "guideline changes require explicit human approval",
+    "active KB versions are immutable",
+    "governance failures are fail-closed",
+    "antibiotic failure cannot block SOFA",
+    "memory analytics cannot modify treatment"
+  ]
+}
