@@ -1,4 +1,60 @@
-<  <div class="app-shell">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#060a12" />
+  <title>Sepsis Bundle | ICU Clinical Decision Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-frame">
+      <svg class="arch-cap" viewBox="0 -32 1000 132" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="archGlow" x="-20%" y="-60%" width="140%" height="220%">
+            <feGaussianBlur stdDeviation="1.3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <path d="M0,100 L0,68 C0,42 26,24 86,18 C220,2 362,-16 500,-18 C638,-16 780,2 914,18 C974,24 1000,42 1000,68 L1000,100 Z"
+              fill="var(--bg-top)" stroke="var(--gold)" stroke-width="1.3" opacity="0.9" filter="url(#archGlow)"/>
+        <path d="M42,100 L42,70 C42,48 62,32 108,26 C230,12 372,-4 500,-6 C628,-4 770,12 892,26 C938,32 958,48 958,70 L958,100"
+              fill="none" stroke="var(--grid)" stroke-width="1"/>
+        <circle cx="500" cy="-18" r="3" fill="var(--gold)" filter="url(#archGlow)"/>
+      </svg>
+
+      <div class="top-row mono">
+        <div>FIVE AGENTS &middot; ONE CHANNEL</div>
+        <div>ACEQUIA MODEL</div>
+      </div>
+
+      <div class="wordmark-block">
+        <div class="wordmark display"><span class="w1">Sepsis</span> <span class="w2">Bundle</span></div>
+        <div class="subtitle">ICU Clinical Decision Support</div>
+        <div class="tag-divider"><div class="line"></div><div class="dot-gold"></div><div class="line right"></div></div>
+        <div class="tagline mono">AGENTS <span class="arrow">&rarr;</span> ONE CHANNEL <span class="arrow">&rarr;</span> PHYSICIAN &middot; AI PROPOSES</div>
+      </div>
+
+      <div id="firstRunNotice" class="alert hidden" style="border-color:rgba(45,212,191,.35);background:rgba(45,212,191,.06);color:var(--teal)">No account exists yet — create the first one below.</div>
+
+      <form id="loginForm" class="login-form">
+        <label>Username<input name="username" required autocomplete="username" /></label>
+        <label>Password<input type="password" name="password" required autocomplete="current-password" minlength="8" /></label>
+        <div id="loginError" class="alert error hidden"></div>
+        <button class="primary" type="submit" style="width:100%;justify-content:center"><span id="loginBtnLabel">Log in</span></button>
+      </form>
+
+      <div class="bottom-row mono">
+        <div>GOVERNANCE-AUDITED &middot; MEMORY-INFORMED</div>
+        <div>v2026.08</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell hidden" id="appShell">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark"><span></span><span></span><span></span></div>
@@ -10,11 +66,13 @@
         <button class="nav-item" data-view="governance"><span>02</span> Governance</button>
         <button class="nav-item" data-view="memory"><span>03</span> Memory & Analytics</button>
         <button class="nav-item" data-view="architecture"><span>04</span> Five-Agent System</button>
+        <button class="nav-item" data-view="guidelines"><span>05</span> Antibiotic Guidelines <span id="guidelinesBadge" class="nav-badge hidden">0</span></button>
       </nav>
       <div class="sidebar-footer mono">
         <div>ACEQUIA MODEL</div>
         <div id="kbVersion">KB — checking</div>
         <div id="healthStatus">SYSTEM — checking</div>
+        <button id="logoutBtn" class="ghost" style="margin-top:12px;width:100%">Log out (<span id="sidebarUsername">—</span>)</button>
       </div>
     </aside>
 
@@ -33,7 +91,7 @@
                 <label>Case ID<input name="case_id" value="CASE-2026-001" required /></label>
                 <label>Patient ID<input name="patient_id" placeholder="Hospital pseudonym" required /></label>
                 <label>Severity<select name="severity"><option value="sepsis">Sepsis</option><option value="septic_shock" selected>Septic shock</option></select></label>
-                <label>Suspected source<select name="suspected_source"><option value="urinary">Urinary</option><option value="pulmonary">Pulmonary</option><option value="abdominal">Abdominal</option><option value="skin_soft_tissue">Skin / soft tissue</option><option value="cns">CNS</option><option value="undifferentiated">Undifferentiated</option></select></label>
+                <label>Suspected source<select name="suspected_source"><option value="urinary">Urinary</option><option value="respiratory">Respiratory</option><option value="abdominal">Abdominal</option><option value="skin_soft_tissue">Skin / soft tissue</option><option value="cns">CNS</option><option value="undifferentiated">Undifferentiated</option></select></label>
               </div>
               <div class="subhead">SOFA inputs</div>
               <div class="form-grid compact">
@@ -41,9 +99,12 @@
                 <label>Platelets (×10⁹/L)<input type="number" step="0.1" name="platelets" placeholder="optional" /></label>
                 <label>Bilirubin (mg/dL)<input type="number" step="0.1" name="bilirubin" placeholder="optional" /></label>
                 <label>MAP (mmHg)<input type="number" step="0.1" name="map_mmhg" placeholder="optional" /></label>
+                <label>Vasopressor<select name="pressor_drug"><option value="none" selected>None</option><option value="dopamine">Dopamine</option><option value="dobutamine">Dobutamine</option><option value="epinephrine">Epinephrine</option><option value="norepinephrine">Norepinephrine</option></select></label>
+                <label>Vasopressor dose (mcg/kg/min)<input type="number" step="0.01" name="pressor_dose" min="0" placeholder="required if vasopressor selected" /></label>
                 <label>GCS<input type="number" step="1" name="gcs" min="3" max="15" placeholder="optional" /></label>
                 <label>Creatinine (mg/dL)<input type="number" step="0.1" name="creatinine" min="0" placeholder="optional" /></label>
-                <label>Urine output (mL/24h)<input type="number" step="1" name="urine_output_24h" min="0" placeholder="optional" /></label>
+                <label>Urine output<input type="number" step="1" name="urine_output_value" min="0" placeholder="optional" /></label>
+                <label>Urine output type<select name="urine_output_unit"><option value="ml_24h" selected>Measured 24h total (mL)</option><option value="ml_kg_hr">Rate (mL/kg/hr) — estimate</option></select></label>
                 <label>Weight (kg)<input type="number" step="0.1" name="weight_kg" min="0" placeholder="optional" /></label>
               </div>
               <div class="subhead">Risk modifiers</div>
@@ -75,11 +136,33 @@
         <div id="resultPanel" class="panel result-panel hidden">
           <div class="panel-head"><div><span class="section-kicker mono">GOVERNED OUTPUT</span><h2>Assessment result</h2></div><span id="resultStatus" class="status-pill">—</span></div>
           <div class="result-grid">
-            <div class="score-card"><span class="section-kicker mono">SOFA</span><strong id="sofaScore">—</strong><small>calculated independently of antibiotic path</small></div>
+            <div class="score-card"><span class="section-kicker mono">SOFA</span><strong id="sofaScore">—</strong><small>calculated independently of antibiotic path</small><small id="urineNote" class="hidden"></small><div id="sofaBreakdown" class="sofa-breakdown"></div></div>
             <div class="result-card"><span class="section-kicker mono">ANTIBIOTIC</span><div id="antibioticResult">No result yet.</div></div>
             <div class="result-card"><span class="section-kicker mono">GOVERNANCE</span><div id="governanceResult">No governance decision yet.</div></div>
           </div>
-          <details><summary>Structured response / audit transparency</summary><pre id="rawResult"></pre></details>
+          <div class="panel readable-summary" id="readableSummary"></div>
+          <details><summary>View raw JSON (audit / developer)</summary><pre id="rawResult"></pre></details>
+        </div>
+
+        <div class="panel intake" style="margin-top:24px">
+          <div class="panel-head"><div><span class="section-kicker mono">CULTURE RESULT</span><h2>De-escalate empirical regimen</h2></div><span class="agent-badge">ANTIBIOTIC</span></div>
+          <form id="deescalateForm">
+            <div class="form-grid">
+              <label>Case ID<input name="de_case_id" placeholder="same as above" required /></label>
+              <label>Severity<select name="de_severity"><option value="sepsis">Sepsis</option><option value="septic_shock" selected>Septic shock</option></select></label>
+              <label>Suspected source<select name="de_suspected_source"><option value="urinary">Urinary</option><option value="respiratory">Respiratory</option><option value="abdominal">Abdominal</option><option value="skin_soft_tissue">Skin / soft tissue</option><option value="cns">CNS</option><option value="undifferentiated">Undifferentiated</option></select></label>
+              <label>Current regimen drug(s)<input name="de_current_regimen" placeholder="e.g. Piperacillin-tazobactam" required /></label>
+              <label>Creatinine (mg/dL)<input type="number" step="0.1" name="de_creatinine" placeholder="optional" /></label>
+              <label>Organism<input name="de_organism" placeholder="e.g. E. coli" required /></label>
+            </div>
+            <label>Sensitivities <small>(one per line, "Drug: S/I/R")</small><textarea name="de_sensitivities" rows="4" placeholder="Piperacillin-tazobactam: S
+Ceftriaxone: S
+Meropenem: S" required></textarea></label>
+            <label>Documented allergies<input name="de_allergies" placeholder="e.g. penicillin (leave blank if none)" /></label>
+            <div class="form-actions"><button class="primary" type="submit"><span>Evaluate de-escalation</span><b>→</b></button></div>
+          </form>
+          <div id="deescalateError" class="alert error hidden"></div>
+          <div id="deescalateResult" class="result-card hidden"></div>
         </div>
       </section>
 
@@ -92,6 +175,8 @@
           <div class="panel policy-card"><span class="policy-icon">04</span><h3>Audit trail</h3><p>Case assessment and governance events are recorded for traceability.</p></div>
         </div>
         <div class="panel matrix"><div class="panel-head"><div><span class="section-kicker mono">POLICY MATRIX</span><h2>Decision boundary</h2></div></div><table><thead><tr><th>Control</th><th>PASS</th><th>WARNING</th><th>BLOCK</th></tr></thead><tbody><tr><td>Antibiotic response</td><td>Allowed</td><td>Allowed with warning</td><td>Not exposed</td></tr><tr><td>Guideline update</td><td>—</td><td>Pending review</td><td>Not activated</td></tr><tr><td>Missing critical input</td><td>—</td><td>Flag</td><td>Escalate / no silent guess</td></tr><tr><td>Provenance</td><td>Versioned</td><td>Review required</td><td>Unverified source blocked</td></tr></tbody></table></div>
+
+        <div class="panel audit-feed"><div class="panel-head"><div><span class="section-kicker mono">LIVE — FROM AUDIT TRAIL</span><h2>Recent governance decisions</h2></div><button class="ghost" id="refreshAudit">Refresh</button></div><div id="auditFeed">No events yet — run an assessment or de-escalation to see governance decisions here.</div></div>
       </section>
 
       <section id="memory" class="view">
@@ -109,6 +194,24 @@
           <div class="arch-agent a4"><b>04</b><strong>GOVERNANCE</strong><small>validation / audit</small></div>
           <div class="arch-agent a5"><b>05</b><strong>MEMORY</strong><small>longitudinal analytics</small></div>
           <div class="arch-basin"><strong>PHYSICIAN DECIDES</strong><small>One decision point · no autonomous treatment</small></div>
+        </div>
+      </section>
+
+      <section id="guidelines" class="view">
+        <div class="page-intro"><span class="section-kicker mono">AGENT 03 — GUIDELINE SURVEILLANCE</span><h2>Antibiotic guidelines</h2><p>Pending guideline changes require reviewer approval before they can become the active knowledge base — nothing activates automatically. Source acquisition currently requires a licensed feed to be wired in per <code>config/source_registry.json</code>; until then this page reflects whatever reviews exist and lets you exercise approve/reject manually.</p></div>
+
+        <div id="guidelinesOverdueBanner" class="alert error hidden" style="margin-bottom:18px"></div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><span>Active KB version</span><strong id="gActiveVersion" class="mono" style="font-size:15px">—</strong></div>
+          <div class="stat-card"><span>Pending reviews</span><strong id="gPendingCount">—</strong></div>
+          <div class="stat-card"><span>Overdue (SLA)</span><strong id="gOverdueCount">—</strong></div>
+          <div class="stat-card"><span>Versions on file</span><strong id="gVersionCount">—</strong></div>
+        </div>
+
+        <div class="panel intake">
+          <div class="panel-head"><div><span class="section-kicker mono">PENDING REVIEWS</span><h2>Awaiting physician/pharmacist decision</h2></div><button class="ghost" id="checkGuidelines">Check for updates</button></div>
+          <div id="guidelinesList">Loading…</div>
         </div>
       </section>
 
