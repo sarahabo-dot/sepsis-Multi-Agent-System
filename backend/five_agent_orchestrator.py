@@ -31,12 +31,16 @@ from antibiotic_agent_schema import (
     Severity,
     SuspectedSource,
     RequestType,
+    ActiveDrug,
+    CultureResult,
 )
 from antibiotic_specialist_agent import get_recommendation
 from antibiotic_rules_engine import load_knowledge_base
 from governance_layer import (
     GovernanceResult,
     validate_antibiotic_response,
+    validate_deescalation_response,
+    governance_event_payload,
 )
 from memory_agent import ClinicalMemoryRecord, MemoryAnalyticsAgent, pseudonymize_patient_id
 from audit_trail import append_event
@@ -171,3 +175,63 @@ async def assess_case(
         "antibiotic_error": antibiotic_error,
         "governance": governance,
     }
+
+
+async def deescalate_case(
+    *,
+    case_id: str,
+    current_regimen: list[ActiveDrug],
+    culture_result: CultureResult,
+    severity: Severity,
+    suspected_source: SuspectedSource,
+    onset_timestamp: datetime,
+    creatinine_mg_dl: Optional[float] = None,
+    documented_allergies: Optional[list[str]] = None,
+) -> dict:
+    """De-escalation path: a culture result has come back for a case already
+    on an empirical regimen. Runs the same governance boundary as the
+    empirical path — a de-escalation suggestion that fails governance is
+    never promoted to the physician."""
+    request = AntibioticRequest(
+        case_id=case_id,
+        request_type=RequestType.DEESCALATION,
+        severity=severity,
+        suspected_source=suspected_source,
+        onset_timestamp=onset_timestamp,
+        creatinine_mg_dl=creatinine_mg_dl,
+        current_regimen=current_regimen,
+        culture_result=culture_result,
+        documented_allergies=documented_allergies or [],
+    )
+
+    response, error = await _safe_antibiotic_call(request)
+
+    governance: Optional[GovernanceResult] = None
+    trusted_response = None
+    if response is not None:
+        kb = load_knowledge_base()
+        governance = validate_deescalation_response(request, response, kb)
+        if governance.allowed:
+            trusted_response = response
+        else:
+            error = "deescalation_governance_blocked"
+
+    append_event(
+        "DEESCALATION_ASSESSMENT",
+        case_id=case_id,
+        agent="five_agent_orchestrator",
+        status=(governance.status.value if governance else ("ERROR" if error else "NO_RESPONSE")),
+        payload={
+            "governance": governance_event_payload(governance) if governance else None,
+            "trusted": trusted_response is not None,
+        },
+    )
+
+    return {
+        "case_id": case_id,
+        "deescalation": trusted_response,
+        "deescalation_raw": response,
+        "error": error,
+        "governance": governance,
+    }
+
