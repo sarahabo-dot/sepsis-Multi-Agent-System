@@ -13,7 +13,7 @@ from enum import Enum
 from typing import Any, Optional
 
 from antibiotic_agent_schema import AntibioticRequest, AntibioticResponse
-from antibiotic_rules_engine import select_regimen
+from antibiotic_rules_engine import select_regimen, evaluate_deescalation
 from audit_trail import append_event
 from governance_policy import evaluate_findings
 
@@ -150,6 +150,64 @@ def validate_antibiotic_response(
     return result
 
 
+def validate_deescalation_response(
+    request: AntibioticRequest,
+    response: AntibioticResponse,
+    kb: dict,
+) -> GovernanceResult:
+    """Validate the de-escalation path the same way validate_antibiotic_response
+    validates the empirical path: recompute the deterministic decision and
+    require the LLM-narrated response to match it exactly."""
+    violations: list[str] = []
+    warnings: list[str] = []
+    active_version = kb.get("version")
+
+    if response.case_id != request.case_id:
+        violations.append("case_id_mismatch")
+    if response.deescalation is None:
+        violations.append("deescalation_missing")
+        expected = None
+    else:
+        expected = evaluate_deescalation(request, kb)
+        e, a = expected, response.deescalation
+        if e.organism_covered_by_current_regimen != a.organism_covered_by_current_regimen:
+            violations.append("deescalation_coverage_mismatch")
+        if e.resistant_alert != a.resistant_alert:
+            violations.append("deescalation_resistant_alert_mismatch")
+        e_narrow = e.narrower_regimen or []
+        a_narrow = a.narrower_regimen or []
+        if len(e_narrow) != len(a_narrow):
+            violations.append("deescalation_narrower_regimen_length_mismatch")
+        else:
+            for i, (ne, na) in enumerate(zip(e_narrow, a_narrow)):
+                for field in ("drug_name", "dose", "route", "frequency"):
+                    if str(getattr(ne, field)).strip().lower() != str(getattr(na, field)).strip().lower():
+                        violations.append(f"deescalation_narrower_regimen_mismatch:index={i}:{field}")
+
+    if response.deescalation and response.deescalation.resistant_alert:
+        warnings.append("resistant_alert_requires_immediate_manual_review")
+    if not response.rationale.strip():
+        warnings.append("empty_rationale")
+
+    policy_action, _ = evaluate_findings(violations, warnings)
+    status = GovernanceStatus(policy_action.value)
+    result = GovernanceResult(
+        status=status,
+        agent_name="governance_layer",
+        kb_version=active_version,
+        violations=tuple(violations),
+        warnings=tuple(warnings),
+    )
+    append_event(
+        "GOVERNANCE_DECISION",
+        case_id=request.case_id,
+        agent="governance_layer",
+        status=result.status.value,
+        payload=governance_event_payload(result),
+    )
+    return result
+
+
 def validate_guideline_activation(
     *,
     review: dict,
@@ -222,3 +280,4 @@ def enforce_antibiotic_decision(result: GovernanceResult) -> None:
 
 class GovernanceBlockedError(RuntimeError):
     """Raised when a clinical output fails deterministic governance checks."""
+
