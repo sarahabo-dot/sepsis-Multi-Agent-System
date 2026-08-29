@@ -104,6 +104,10 @@ class AntibioticRequest(BaseModel):
 
 class RegimenOption(BaseModel):
     drug_name: str
+    drug_class: Optional[str] = None  # e.g. "3rd-generation cephalosporin" —
+                                       # the primary recommendation; drug_name
+                                       # is a suggested starting agent within it
+    spectrum_rank: Optional[int] = None  # lower = narrower spectrum (KB scaffold ordering)
     dose: str                 # e.g. "4.5 g"
     route: str                # e.g. "IV"
     frequency: str            # e.g. "every 6h"
@@ -146,9 +150,12 @@ class AntibioticResponse(BaseModel):
     fungal_flag: Optional[FungalFlag] = None
 
     deescalation: Optional[DeescalationAdvice] = None  # only for DEESCALATION requests
+    reassessment_due_at: Optional[datetime] = None  # empirical only: onset + reassessment window —
+                                                       # when no culture result has arrived yet
 
     warnings: list[str] = Field(default_factory=list)  # e.g. allergy conflicts
     rationale: str = ""            # LLM narration, grounded in the fields above only
 
     generated_at: datetime = Field(default_factory=datetime.utcnow)
     missing_inputs: list[str] = Field(default_factory=list)  # e.g. ["creatinine"]
+
