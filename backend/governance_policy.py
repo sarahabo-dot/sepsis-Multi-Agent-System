@@ -56,6 +56,7 @@ POLICY_MATRIX: tuple[PolicyRule, ...] = (
     PolicyRule("GOV-027", "proposed_version_matches_active_version", PolicyAction.BLOCK, False, True, "GUIDELINE_GOVERNANCE_BLOCK", "Activation must create a distinct immutable version."),
     PolicyRule("GOV-028", "invalid_kb_entry_structure", PolicyAction.BLOCK, False, True, "GUIDELINE_GOVERNANCE_BLOCK", "Malformed clinical rules cannot be activated."),
     PolicyRule("GOV-029", "proposed_kb_version_missing_will_be_assigned_by_versioning", PolicyAction.WARNING, True, True, "GUIDELINE_GOVERNANCE_WARNING", "Versioning will assign the final immutable identifier."),
+    PolicyRule("GOV-030", "resistant_alert_requires_immediate_manual_review", PolicyAction.WARNING, True, True, "GOVERNANCE_WARNING", "A resistant-organism finding is a valid clinical result, not a governance failure — it must reach the physician clearly, not be suppressed."),
 )
 
 _RULE_BY_FINDING = {r.finding: r for r in POLICY_MATRIX}
