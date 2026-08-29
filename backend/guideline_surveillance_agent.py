@@ -15,9 +15,9 @@ from audit_trail import append_event
 logger = logging.getLogger("sepsis_bundle.guideline_surveillance")
 client = AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY")) if AsyncAnthropic else None
 REVIEW_SLA_DAYS = 5
-SOURCE_REGISTRY_PATH = Path(__file__).parent / "config" / "source_registry.json"
-PENDING_REVIEWS_PATH = Path(__file__).parent / "pending_guideline_reviews.json"
-TOPIC_HASHES_PATH = Path(__file__).parent / "guideline_topic_hashes.json"
+SOURCE_REGISTRY_PATH = Path(__file__).parent / "config" / "source_registry.json"  # config, not runtime state — stays with code
+PENDING_REVIEWS_PATH = Path(os.environ.get("SEPSIS_PENDING_REVIEWS_PATH", str(Path(__file__).parent / "pending_guideline_reviews.json")))
+TOPIC_HASHES_PATH = Path(os.environ.get("SEPSIS_TOPIC_HASHES_PATH", str(Path(__file__).parent / "guideline_topic_hashes.json")))
 TRACKED_TOPICS = [
     "empirical_timing_targets", "mdr_coverage_criteria", "mrsa_coverage_criteria",
     "anaerobic_coverage_criteria", "fungal_coverage_criteria", "renal_dose_adjustment",
@@ -54,6 +54,17 @@ def _load_topic_hashes(): return json.loads(TOPIC_HASHES_PATH.read_text()) if TO
 def _save_topic_hashes(h): TOPIC_HASHES_PATH.write_text(json.dumps(h, indent=2))
 def _load_pending_reviews(): return json.loads(PENDING_REVIEWS_PATH.read_text()) if PENDING_REVIEWS_PATH.exists() else []
 def _save_pending_reviews(r): PENDING_REVIEWS_PATH.write_text(json.dumps(r, indent=2, default=str))
+
+def list_pending_reviews() -> list[dict]:
+    """Public read accessor for the frontend/API layer — everything with
+    status == 'pending', each annotated with an 'overdue' flag."""
+    now = datetime.utcnow()
+    overdue_ids = {r["review_id"] for r in get_overdue_reviews()}
+    return [
+        {**r, "overdue": r["review_id"] in overdue_ids}
+        for r in _load_pending_reviews()
+        if r["status"] == "pending"
+    ]
 
 async def _fetch_source_topic_text(source_id: str, topic: str) -> str:
     raise NotImplementedError(f"Define a licensed acquisition method for source={source_id}, topic={topic}")
@@ -125,3 +136,4 @@ def reject_pending_review(review_id: str, reviewed_by: str, reason: str) -> None
             break
     else: raise ValueError(f"Unknown review_id: {review_id}")
     _save_pending_reviews(pending)
+
