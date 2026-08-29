@@ -15,6 +15,8 @@ from antibiotic_agent_schema import (
     AppliedModifier,
     FungalFlag,
     ModifierType,
+    CultureResult,
+    DeescalationAdvice,
 )
 
 
@@ -52,6 +54,8 @@ def _apply_renal_adjustment(
                 adjusted = True
         options.append(RegimenOption(
             drug_name=drug["drug_name"],
+            drug_class=drug.get("drug_class"),
+            spectrum_rank=drug.get("spectrum_rank"),
             dose=drug["dose"],
             route=drug["route"],
             frequency=frequency,
@@ -150,3 +154,108 @@ def select_regimen(
         )
 
     return regimen, modifiers, fungal_flag, missing_inputs
+
+
+# ---------------------------------------------------------------------------
+# De-escalation: empirical regimen -> culture-guided narrower regimen.
+# Deterministic — the LLM narration layer only explains this, never decides it.
+# ---------------------------------------------------------------------------
+
+REASSESSMENT_WINDOW_HOURS = 48  # empirical regimen without a culture result yet
+
+
+def _drug_catalog(kb: dict) -> dict[str, dict]:
+    """Every drug the KB knows about (base regimens + modifier options),
+    deduplicated by lowercased name. Used to look up spectrum_rank/drug_class
+    for any drug shown as susceptible in a culture result, even if it wasn't
+    part of this case's original empirical regimen."""
+    catalog: dict[str, dict] = {}
+    for entry in kb["entries"]:
+        for d in entry["base_regimen"]:
+            catalog.setdefault(d["drug_name"].lower(), d)
+    for mod in kb["modifier_rules"].values():
+        for d in mod.get("drug_options", []):
+            catalog.setdefault(d["drug_name"].lower(), d)
+    return catalog
+
+
+def evaluate_deescalation(
+    request: AntibioticRequest, kb: Optional[dict] = None
+) -> DeescalationAdvice:
+    """Deterministic de-escalation decision from a culture result.
+
+    Priority, in order:
+    1. If NO current regimen drug shows S/I against the organism, this is a
+       resistant_alert — none of what's running works. Highest priority,
+       surfaced regardless of anything else.
+    2. Otherwise, if the narrowest-spectrum drug among all S-rated options
+       (by KB spectrum_rank, excluding documented allergies) is narrower
+       than every drug in the current regimen, propose it as narrower_regimen.
+    3. Otherwise, current regimen already is (or is as narrow as) an
+       appropriate covering choice — no change proposed.
+    """
+    kb = kb or load_knowledge_base()
+    culture: Optional[CultureResult] = request.culture_result
+    if culture is None:
+        # Nothing to de-escalate against yet.
+        return DeescalationAdvice(
+            organism_covered_by_current_regimen=False,
+            resistant_alert=False,
+            narrower_regimen=None,
+            reassessment_window_hours=REASSESSMENT_WINDOW_HOURS,
+        )
+
+    catalog = _drug_catalog(kb)
+    current_names = {d.drug_name.lower() for d in request.current_regimen}
+    allergy_names = {a.lower() for a in request.documented_allergies}
+    # Culture sensitivities come in with whatever casing the lab report used
+    # (e.g. "Piperacillin-tazobactam"); match case-insensitively against it.
+    sensitivities_lower = {name.lower(): rating for name, rating in culture.sensitivities.items()}
+
+    def sensitivity(drug_name: str) -> Optional[str]:
+        return sensitivities_lower.get(drug_name.lower())
+
+    current_ratings = {name: sensitivity(name) for name in current_names}
+    organism_covered = any(r in ("S", "I") for r in current_ratings.values())
+    resistant_alert = not organism_covered
+
+    narrower_regimen = None
+    if not resistant_alert:
+        current_min_rank = min(
+            (catalog.get(name, {}).get("spectrum_rank", 99) for name in current_names),
+            default=99,
+        )
+        susceptible_candidates = [
+            (name, rating) for name, rating in culture.sensitivities.items()
+            if rating == "S" and name.lower() not in allergy_names
+        ]
+        ranked = sorted(
+            susceptible_candidates,
+            key=lambda nc: catalog.get(nc[0].lower(), {}).get("spectrum_rank", 99),
+        )
+        if ranked:
+            best_name, _ = ranked[0]
+            best_entry = catalog.get(best_name.lower())
+            best_rank = best_entry.get("spectrum_rank", 99) if best_entry else 99
+            if best_entry is not None and best_rank < current_min_rank:
+                narrower_regimen = [RegimenOption(
+                    drug_name=best_entry["drug_name"],
+                    drug_class=best_entry.get("drug_class"),
+                    spectrum_rank=best_entry.get("spectrum_rank"),
+                    dose=best_entry["dose"],
+                    route=best_entry["route"],
+                    frequency=best_entry["frequency"],
+                    renal_adjusted=False,
+                    renal_adjustment_note=(
+                        "Renal adjustment not re-evaluated for de-escalation — "
+                        "confirm against current creatinine before administering."
+                    ),
+                )]
+
+    return DeescalationAdvice(
+        organism_covered_by_current_regimen=organism_covered,
+        resistant_alert=resistant_alert,
+        narrower_regimen=narrower_regimen,
+        reassessment_window_hours=REASSESSMENT_WINDOW_HOURS,
+    )
+
