@@ -95,3 +95,22 @@ def verify_chain() -> tuple[bool, Optional[str]]:
                 return False, f"hash_mismatch:line={line_no}"
             previous = supplied
     return True, None
+
+
+def recent_events(limit: int = 25, case_id: Optional[str] = None) -> list[dict[str, Any]]:
+    """Read-only view for display purposes (e.g. the Governance tab). Not
+    the clinical record; returns the most recent events, newest first."""
+    if not AUDIT_LOG_PATH.exists():
+        return []
+    events: list[dict[str, Any]] = []
+    with AUDIT_LOG_PATH.open("r", encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            event = json.loads(line)
+            if case_id is not None and event.get("case_id") != case_id:
+                continue
+            events.append(event)
+    events.reverse()
+    return events[:limit]
+
