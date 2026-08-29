@@ -18,12 +18,13 @@ for how a version gets proposed and approved).
 """
 
 import json
+import os
 import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-KB_VERSIONS_DIR = Path(__file__).parent / "kb_versions"
+KB_VERSIONS_DIR = Path(os.environ.get("SEPSIS_KB_VERSIONS_DIR", str(Path(__file__).parent / "kb_versions")))
 ACTIVE_POINTER_PATH = KB_VERSIONS_DIR / "active_pointer.json"
 
 
@@ -130,3 +131,4 @@ def bootstrap_initial_version(source_path: Path) -> str:
 # guideline_versioning.load_active_knowledge_base() instead. Left as a
 # manual step rather than done automatically, since it changes what the
 # rules engine depends on and deserves its own review/test pass.
+
