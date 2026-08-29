@@ -1,128 +1,273 @@
 {
-  "_disclaimer": "SCAFFOLD DATA ONLY. Drug choices and doses below are illustrative placeholders to validate the pipeline's structure and logic. Every entry must be reviewed and calibrated against the local hospital antibiogram by a pharmacist/ID physician before this file is used for any real recommendation. Do not deploy with this data as-is.",
-  "version": "scaffold-2026-08-19",
-  "entries": [
-    {
-      "source": "urinary",
-      "severity": "sepsis",
-      "base_regimen": [
-        {"drug_name": "Ceftriaxone", "dose": "2 g", "route": "IV", "frequency": "every 24h"}
-      ],
-      "renal_adjustment_rules": []
-    },
-    {
-      "source": "urinary",
-      "severity": "septic_shock",
-      "base_regimen": [
-        {"drug_name": "Piperacillin-tazobactam", "dose": "4.5 g", "route": "IV", "frequency": "every 6h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 1.5, "adjusted_frequency": "every 8h", "note": "Interval extended for renal impairment"},
-        {"creatinine_gte": 3.0, "adjusted_frequency": "every 12h", "note": "Further extension for severe renal impairment"}
-      ]
-    },
-    {
-      "source": "respiratory",
-      "severity": "sepsis",
-      "base_regimen": [
-        {"drug_name": "Ceftriaxone", "dose": "2 g", "route": "IV", "frequency": "every 24h"},
-        {"drug_name": "Azithromycin", "dose": "500 mg", "route": "IV", "frequency": "every 24h"}
-      ],
-      "renal_adjustment_rules": []
-    },
-    {
-      "source": "respiratory",
-      "severity": "septic_shock",
-      "base_regimen": [
-        {"drug_name": "Piperacillin-tazobactam", "dose": "4.5 g", "route": "IV", "frequency": "every 6h"},
-        {"drug_name": "Azithromycin", "dose": "500 mg", "route": "IV", "frequency": "every 24h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 1.5, "adjusted_frequency": "every 8h", "note": "Interval extended for renal impairment"}
-      ]
-    },
-    {
-      "source": "abdominal",
-      "severity": "sepsis",
-      "base_regimen": [
-        {"drug_name": "Piperacillin-tazobactam", "dose": "4.5 g", "route": "IV", "frequency": "every 6h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 1.5, "adjusted_frequency": "every 8h", "note": "Interval extended for renal impairment"}
-      ]
-    },
-    {
-      "source": "abdominal",
-      "severity": "septic_shock",
-      "base_regimen": [
-        {"drug_name": "Meropenem", "dose": "1 g", "route": "IV", "frequency": "every 8h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 2.0, "adjusted_frequency": "every 12h", "note": "Interval extended for renal impairment"}
-      ]
-    },
-    {
-      "source": "skin_soft_tissue",
-      "severity": "sepsis",
-      "base_regimen": [
-        {"drug_name": "Ceftriaxone", "dose": "2 g", "route": "IV", "frequency": "every 24h"}
-      ],
-      "renal_adjustment_rules": []
-    },
-    {
-      "source": "cns",
-      "severity": "sepsis",
-      "base_regimen": [
-        {"drug_name": "Ceftriaxone", "dose": "2 g", "route": "IV", "frequency": "every 12h"},
-        {"drug_name": "Vancomycin", "dose": "weight-based, per local protocol", "route": "IV", "frequency": "every 8-12h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 1.5, "adjusted_frequency": "per vancomycin nomogram / levels", "note": "Requires level-based dosing, not fixed interval"}
-      ]
-    },
-    {
-      "source": "bloodstream_unknown",
-      "severity": "sepsis",
-      "base_regimen": [
-        {"drug_name": "Piperacillin-tazobactam", "dose": "4.5 g", "route": "IV", "frequency": "every 6h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 1.5, "adjusted_frequency": "every 8h", "note": "Interval extended for renal impairment"}
-      ]
-    },
-    {
-      "source": "undifferentiated",
-      "severity": "septic_shock",
-      "base_regimen": [
-        {"drug_name": "Meropenem", "dose": "1 g", "route": "IV", "frequency": "every 8h"}
-      ],
-      "renal_adjustment_rules": [
-        {"creatinine_gte": 2.0, "adjusted_frequency": "every 12h", "note": "Interval extended for renal impairment"}
-      ]
+    "_disclaimer": "SCAFFOLD DATA ONLY. Drug choices and doses below are illustrative placeholders to validate the pipeline's structure and logic. Every entry must be reviewed and calibrated against the local hospital antibiogram by a pharmacist/ID physician before this file is used for any real recommendation. Do not deploy with this data as-is. drug_class labels were added as a structural field (not clinically re-verified) — confirm each during the pharmacist/ID review pass. spectrum_rank (lower=narrower) is a scaffold ordering for de-escalation logic — needs pharmacist/ID review before clinical use.",
+    "version": "scaffold-2026-08-19",
+    "entries": [
+        {
+            "source": "urinary",
+            "severity": "sepsis",
+            "base_regimen": [
+                {
+                    "drug_name": "Ceftriaxone",
+                    "dose": "2 g",
+                    "route": "IV",
+                    "frequency": "every 24h",
+                    "drug_class": "3rd-generation cephalosporin",
+                    "spectrum_rank": 3
+                }
+            ],
+            "renal_adjustment_rules": []
+        },
+        {
+            "source": "urinary",
+            "severity": "septic_shock",
+            "base_regimen": [
+                {
+                    "drug_name": "Piperacillin-tazobactam",
+                    "dose": "4.5 g",
+                    "route": "IV",
+                    "frequency": "every 6h",
+                    "drug_class": "Beta-lactam/beta-lactamase inhibitor (anti-pseudomonal penicillin)",
+                    "spectrum_rank": 5
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 1.5,
+                    "adjusted_frequency": "every 8h",
+                    "note": "Interval extended for renal impairment"
+                },
+                {
+                    "creatinine_gte": 3.0,
+                    "adjusted_frequency": "every 12h",
+                    "note": "Further extension for severe renal impairment"
+                }
+            ]
+        },
+        {
+            "source": "respiratory",
+            "severity": "sepsis",
+            "base_regimen": [
+                {
+                    "drug_name": "Ceftriaxone",
+                    "dose": "2 g",
+                    "route": "IV",
+                    "frequency": "every 24h",
+                    "drug_class": "3rd-generation cephalosporin",
+                    "spectrum_rank": 3
+                },
+                {
+                    "drug_name": "Azithromycin",
+                    "dose": "500 mg",
+                    "route": "IV",
+                    "frequency": "every 24h",
+                    "drug_class": "Macrolide",
+                    "spectrum_rank": 1
+                }
+            ],
+            "renal_adjustment_rules": []
+        },
+        {
+            "source": "respiratory",
+            "severity": "septic_shock",
+            "base_regimen": [
+                {
+                    "drug_name": "Piperacillin-tazobactam",
+                    "dose": "4.5 g",
+                    "route": "IV",
+                    "frequency": "every 6h",
+                    "drug_class": "Beta-lactam/beta-lactamase inhibitor (anti-pseudomonal penicillin)",
+                    "spectrum_rank": 5
+                },
+                {
+                    "drug_name": "Azithromycin",
+                    "dose": "500 mg",
+                    "route": "IV",
+                    "frequency": "every 24h",
+                    "drug_class": "Macrolide",
+                    "spectrum_rank": 1
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 1.5,
+                    "adjusted_frequency": "every 8h",
+                    "note": "Interval extended for renal impairment"
+                }
+            ]
+        },
+        {
+            "source": "abdominal",
+            "severity": "sepsis",
+            "base_regimen": [
+                {
+                    "drug_name": "Piperacillin-tazobactam",
+                    "dose": "4.5 g",
+                    "route": "IV",
+                    "frequency": "every 6h",
+                    "drug_class": "Beta-lactam/beta-lactamase inhibitor (anti-pseudomonal penicillin)",
+                    "spectrum_rank": 5
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 1.5,
+                    "adjusted_frequency": "every 8h",
+                    "note": "Interval extended for renal impairment"
+                }
+            ]
+        },
+        {
+            "source": "abdominal",
+            "severity": "septic_shock",
+            "base_regimen": [
+                {
+                    "drug_name": "Meropenem",
+                    "dose": "1 g",
+                    "route": "IV",
+                    "frequency": "every 8h",
+                    "drug_class": "Carbapenem",
+                    "spectrum_rank": 6
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 2.0,
+                    "adjusted_frequency": "every 12h",
+                    "note": "Interval extended for renal impairment"
+                }
+            ]
+        },
+        {
+            "source": "skin_soft_tissue",
+            "severity": "sepsis",
+            "base_regimen": [
+                {
+                    "drug_name": "Ceftriaxone",
+                    "dose": "2 g",
+                    "route": "IV",
+                    "frequency": "every 24h",
+                    "drug_class": "3rd-generation cephalosporin",
+                    "spectrum_rank": 3
+                }
+            ],
+            "renal_adjustment_rules": []
+        },
+        {
+            "source": "cns",
+            "severity": "sepsis",
+            "base_regimen": [
+                {
+                    "drug_name": "Ceftriaxone",
+                    "dose": "2 g",
+                    "route": "IV",
+                    "frequency": "every 12h",
+                    "drug_class": "3rd-generation cephalosporin",
+                    "spectrum_rank": 3
+                },
+                {
+                    "drug_name": "Vancomycin",
+                    "dose": "weight-based, per local protocol",
+                    "route": "IV",
+                    "frequency": "every 8-12h",
+                    "drug_class": "Glycopeptide",
+                    "spectrum_rank": 2
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 1.5,
+                    "adjusted_frequency": "per vancomycin nomogram / levels",
+                    "note": "Requires level-based dosing, not fixed interval"
+                }
+            ]
+        },
+        {
+            "source": "bloodstream_unknown",
+            "severity": "sepsis",
+            "base_regimen": [
+                {
+                    "drug_name": "Piperacillin-tazobactam",
+                    "dose": "4.5 g",
+                    "route": "IV",
+                    "frequency": "every 6h",
+                    "drug_class": "Beta-lactam/beta-lactamase inhibitor (anti-pseudomonal penicillin)",
+                    "spectrum_rank": 5
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 1.5,
+                    "adjusted_frequency": "every 8h",
+                    "note": "Interval extended for renal impairment"
+                }
+            ]
+        },
+        {
+            "source": "undifferentiated",
+            "severity": "septic_shock",
+            "base_regimen": [
+                {
+                    "drug_name": "Meropenem",
+                    "dose": "1 g",
+                    "route": "IV",
+                    "frequency": "every 8h",
+                    "drug_class": "Carbapenem",
+                    "spectrum_rank": 6
+                }
+            ],
+            "renal_adjustment_rules": [
+                {
+                    "creatinine_gte": 2.0,
+                    "adjusted_frequency": "every 12h",
+                    "note": "Interval extended for renal impairment"
+                }
+            ]
+        }
+    ],
+    "modifier_rules": {
+        "mdr": {
+            "action": "broaden_or_switch",
+            "note": "Switch base beta-lactam to a carbapenem or add MDR-active agent per local antibiogram."
+        },
+        "mrsa": {
+            "action": "add",
+            "drug_options": [
+                {
+                    "drug_name": "Vancomycin",
+                    "dose": "weight-based, per local protocol",
+                    "route": "IV",
+                    "frequency": "every 8-12h",
+                    "drug_class": "Glycopeptide",
+                    "spectrum_rank": 2
+                },
+                {
+                    "drug_name": "Linezolid",
+                    "dose": "600 mg",
+                    "route": "IV",
+                    "frequency": "every 12h",
+                    "drug_class": "Oxazolidinone",
+                    "spectrum_rank": 2
+                }
+            ]
+        },
+        "anaerobic": {
+            "action": "add",
+            "drug_options": [
+                {
+                    "drug_name": "Metronidazole",
+                    "dose": "500 mg",
+                    "route": "IV",
+                    "frequency": "every 8h",
+                    "drug_class": "Nitroimidazole",
+                    "spectrum_rank": 2
+                }
+            ],
+            "note": "Skip if base regimen already has anaerobic activity (e.g. piperacillin-tazobactam, meropenem)."
+        },
+        "fungal": {
+            "action": "flag_only",
+            "note": "Never auto-added. Case-by-case ID/pharmacy review only."
+        }
     }
-  ],
-  "modifier_rules": {
-    "mdr": {
-      "action": "broaden_or_switch",
-      "note": "Switch base beta-lactam to a carbapenem or add MDR-active agent per local antibiogram."
-    },
-    "mrsa": {
-      "action": "add",
-      "drug_options": [
-        {"drug_name": "Vancomycin", "dose": "weight-based, per local protocol", "route": "IV", "frequency": "every 8-12h"},
-        {"drug_name": "Linezolid", "dose": "600 mg", "route": "IV", "frequency": "every 12h"}
-      ]
-    },
-    "anaerobic": {
-      "action": "add",
-      "drug_options": [
-        {"drug_name": "Metronidazole", "dose": "500 mg", "route": "IV", "frequency": "every 8h"}
-      ],
-      "note": "Skip if base regimen already has anaerobic activity (e.g. piperacillin-tazobactam, meropenem)."
-    },
-    "fungal": {
-      "action": "flag_only",
-      "note": "Never auto-added. Case-by-case ID/pharmacy review only."
-    }
-  }
 }
+
