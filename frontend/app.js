@@ -187,18 +187,22 @@ $('#deescalateForm').addEventListener('submit', async e=>{
       documented_allergies: form.elements.de_allergies.value.split(';').map(x=>x.trim()).filter(Boolean),
     };
     const data=await api('/deescalate',{method:'POST',body:JSON.stringify(payload)});
-    const d=data.deescalation;
+    const d=data.deescalation; const g=data.governance;
     resultEl.classList.remove('hidden');
-    if(!d){resultEl.innerHTML=`<div class="alert error">${escapeHtml(data.error||'No trusted de-escalation output — governance blocked or agent error.')}</div>`}
-    else if(d.resistant_alert){resultEl.innerHTML=`<div class="alert error"><b>⚠ RESISTANT ALERT</b> — current regimen not covered by culture. Manual antibiotic selection required immediately.</div>`}
-    else{
+    const govLine = g ? `<div class="rs-section"><span class="status-pill ${(g.status||'').toLowerCase()}">${escapeHtml(g.status||'')}</span> <small style="color:var(--muted)">KB ${escapeHtml(g.kb_version||'—')}</small></div>` : '';
+    let body;
+    if(!d){
+      body = `<div class="alert error">${escapeHtml(data.error||'No trusted de-escalation output — governance blocked or agent error.')}</div>`;
+    } else if(d.resistant_alert){
+      body = `<div class="alert error"><b>⚠ RESISTANT ALERT</b><br>The organism is not covered by any drug in the current regimen. Manual antibiotic selection is required immediately.</div>`;
+    } else {
       const narrow=(d.narrower_regimen||[]);
-      resultEl.innerHTML = narrow.length
-        ? `<div><b>Narrower option available:</b></div>${narrow.map(r=>`<div class="drug"><span><b>${escapeHtml(r.drug_class||'Unclassified')}</b><br><small>suggested agent: ${escapeHtml(r.drug_name)}</small></span><span>${escapeHtml(r.dose)} ${escapeHtml(r.route)} ${escapeHtml(r.frequency)}</span></div>`).join('')}<small>${escapeHtml(narrow[0].renal_adjustment_note||'')}</small>`
-        : `<div>Current regimen remains covered by susceptibility results — no narrower option identified.</div>`;
-      resultEl.innerHTML += `<small>Reassessment window: ${d.reassessment_window_hours}h</small>`;
+      body = narrow.length
+        ? `<div class="rs-section"><h4>Narrower option available</h4>${narrow.map(r=>`<div class="drug"><span><b>${escapeHtml(r.drug_class||'Unclassified')}</b><br><small>suggested agent: ${escapeHtml(r.drug_name)}</small></span><span>${escapeHtml(r.dose)} ${escapeHtml(r.route)} ${escapeHtml(r.frequency)}</span></div>`).join('')}<p style="margin-top:8px">${escapeHtml(narrow[0].renal_adjustment_note||'')}</p></div>`
+        : `<div class="rs-section"><h4>Current regimen remains covered</h4><p>Susceptibility results support the current regimen — no narrower option identified.</p></div>`;
+      body += `<div class="rs-section"><p>Reassessment window: <b>${d.reassessment_window_hours}h</b></p></div>`;
     }
-    resultEl.innerHTML += `<pre style="margin-top:12px">${escapeHtml(JSON.stringify(data,null,2))}</pre>`;
+    resultEl.innerHTML = govLine + body + `<details style="margin-top:10px"><summary>View raw JSON (audit / developer)</summary><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre></details>`;
     loadAudit();
   }catch(ex){
     err.textContent=ex.message; err.classList.remove('hidden');
@@ -304,4 +308,3 @@ $('#checkGuidelines').addEventListener('click', async ()=>{
 
 // Surface the alert badge on load, regardless of which tab is active.
 // (Only fires once actually authenticated — see showApp().)
-
