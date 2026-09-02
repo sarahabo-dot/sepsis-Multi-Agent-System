@@ -28,23 +28,42 @@
 .readable-summary ul{margin:6px 0 0;padding-left:18px;font-size:12px;line-height:1.7;color:var(--muted)}
 .readable-summary .rs-empty{color:var(--muted2);font-style:italic}
 
-/* --- Login screen (Acequia identity) --- */
-.login-screen{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+/* --- Login screen (Acequia identity, split layout) --- */
+.login-screen{position:fixed;inset:0;z-index:50;background:var(--bg);overflow:auto}
 .login-screen.hidden{display:none!important}
-.login-frame{width:100%;max-width:520px;background:radial-gradient(ellipse 700px 300px at 50% 88%,rgba(45,212,191,.05) 0%,transparent 70%),radial-gradient(ellipse at 50% 0%,var(--bg2) 0%,var(--bg) 60%);border:1px solid var(--grid);border-top:none;border-radius:0 0 10px 10px;padding:6px 30px 32px}
-.login-frame .arch-cap{width:100%;display:block;margin-top:-1px}
-.login-frame .top-row{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.06em;color:var(--muted);margin-top:16px}
-.login-frame .wordmark-block{text-align:center;margin-top:20px}
-.login-frame .wordmark{font:800 34px 'Space Grotesk';letter-spacing:-.02em}
-.login-frame .wordmark .w1{color:var(--text)}
-.login-frame .wordmark .w2{color:var(--teal)}
-.login-frame .subtitle{font-size:10.5px;letter-spacing:.18em;color:var(--muted);margin-top:9px;text-transform:uppercase}
-.login-frame .tag-divider{display:flex;align-items:center;justify-content:center;gap:9px;margin:18px 0 12px}
-.login-frame .tag-divider .line{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--grid))}
-.login-frame .tag-divider .line.right{background:linear-gradient(90deg,var(--grid),transparent)}
-.login-frame .dot-gold{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold)}
-.login-frame .tagline{text-align:center;font-size:10px;letter-spacing:.07em;color:var(--muted)}
-.login-frame .tagline .arrow{color:var(--gold);margin:0 4px}
-.login-form{margin-top:26px;display:flex;flex-direction:column;gap:12px}
-.login-frame .bottom-row{display:flex;justify-content:space-between;margin-top:26px;padding-top:14px;border-top:1px solid var(--grid);font-size:9px;letter-spacing:.06em;color:var(--muted2)}
+.login-split{display:grid;grid-template-columns:1.15fr 1fr;min-height:100vh}
 
+.login-identity{position:relative;display:flex;flex-direction:column;justify-content:space-between;
+  padding:28px 40px 30px;border-right:1px solid var(--grid);
+  background:radial-gradient(ellipse 640px 340px at 50% 82%,rgba(45,212,191,.06) 0%,transparent 70%),
+             radial-gradient(ellipse at 50% 2%,var(--bg2) 0%,var(--bg) 62%)}
+.login-identity .top-row{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.06em;color:var(--muted)}
+.login-canvas-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;max-width:640px;margin:0 auto;width:100%}
+.login-canvas-wrap .canvas{width:100%;max-width:560px;height:auto}
+.node-label{font-size:10px;fill:var(--text);font-weight:500;letter-spacing:.02em}
+.node-sub{font-size:8.5px;fill:var(--muted);letter-spacing:.05em}
+.basin-label{font-size:12px;fill:var(--teal);font-weight:600;letter-spacing:.08em}
+.login-identity .wordmark-block{text-align:center;margin-top:8px}
+.login-identity .wordmark{font:800 38px 'Space Grotesk';letter-spacing:-.02em}
+.login-identity .wordmark .w1{color:var(--text)}
+.login-identity .wordmark .w2{color:var(--teal)}
+.login-identity .subtitle{font-size:11px;letter-spacing:.2em;color:var(--muted);margin-top:10px;text-transform:uppercase}
+.login-identity .tag-divider{display:flex;align-items:center;justify-content:center;gap:10px;margin:20px 0 14px}
+.login-identity .tag-divider .line{width:52px;height:1px;background:linear-gradient(90deg,transparent,var(--grid))}
+.login-identity .tag-divider .line.right{background:linear-gradient(90deg,var(--grid),transparent)}
+.login-identity .dot-gold{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.login-identity .tagline{text-align:center;font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.login-identity .tagline .arrow{color:var(--gold);margin:0 5px}
+.login-identity .bottom-row{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.06em;color:var(--muted2)}
+
+.login-auth{display:flex;align-items:center;justify-content:center;padding:40px}
+.login-auth-card{width:100%;max-width:360px}
+.login-auth-card .eyebrow{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.login-auth-card h1{font:700 26px 'Space Grotesk';margin:8px 0 24px}
+.login-form{display:flex;flex-direction:column;gap:14px}
+
+@media (max-width:860px){
+  .login-split{grid-template-columns:1fr}
+  .login-identity{border-right:0;border-bottom:1px solid var(--grid);min-height:52vh;padding:20px 20px 24px}
+  .login-canvas-wrap .canvas{max-width:380px}
+}
