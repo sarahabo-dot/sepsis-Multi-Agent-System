@@ -11,45 +11,108 @@
 </head>
 <body>
   <div id="loginScreen" class="login-screen">
-    <div class="login-frame">
-      <svg class="arch-cap" viewBox="0 -32 1000 132" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="archGlow" x="-20%" y="-60%" width="140%" height="220%">
-            <feGaussianBlur stdDeviation="1.3" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <path d="M0,100 L0,68 C0,42 26,24 86,18 C220,2 362,-16 500,-18 C638,-16 780,2 914,18 C974,24 1000,42 1000,68 L1000,100 Z"
-              fill="var(--bg-top)" stroke="var(--gold)" stroke-width="1.3" opacity="0.9" filter="url(#archGlow)"/>
-        <path d="M42,100 L42,70 C42,48 62,32 108,26 C230,12 372,-4 500,-6 C628,-4 770,12 892,26 C938,32 958,48 958,70 L958,100"
-              fill="none" stroke="var(--grid)" stroke-width="1"/>
-        <circle cx="500" cy="-18" r="3" fill="var(--gold)" filter="url(#archGlow)"/>
-      </svg>
+    <div class="login-split">
+      <div class="login-identity">
+        <div class="top-row mono">
+          <div>FIVE AGENTS &middot; ONE CHANNEL</div>
+          <div>ACEQUIA MODEL</div>
+        </div>
 
-      <div class="top-row mono">
-        <div>FIVE AGENTS &middot; ONE CHANNEL</div>
-        <div>ACEQUIA MODEL</div>
+        <div class="login-canvas-wrap">
+          <svg class="canvas" viewBox="0 0 700 470" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="flowFade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.22"/>
+                <stop offset="70%" stop-color="var(--gold)" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="var(--gold)" stop-opacity="0.85"/>
+              </linearGradient>
+              <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="2.2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="basinGlow" x="-150%" y="-150%" width="400%" height="400%">
+                <feGaussianBlur stdDeviation="6"/>
+              </filter>
+            </defs>
+
+            <circle cx="360" cy="400" r="46" fill="var(--teal)" opacity="0.10" filter="url(#basinGlow)"/>
+
+            <g fill="none" stroke="url(#flowFade)" stroke-width="1.4" filter="url(#softGlow)">
+              <path id="ch1" d="M66,74 C 126,152 176,266 332,388"/>
+              <path id="ch2" d="M226,58 C 258,152 298,266 347,383"/>
+              <path id="ch3" d="M360,52 C 360,152 358,266 360,386"/>
+              <path id="ch4" d="M494,64 C 452,152 412,266 373,383"/>
+              <path id="ch5" d="M634,80 C 552,158 442,266 388,388"/>
+            </g>
+
+            <g class="mono">
+              <g><circle cx="66" cy="74" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+                <circle cx="66" cy="74" r="3" fill="var(--gold)"/>
+                <text x="66" y="46" text-anchor="middle" class="node-label">SEPSIS BUNDLE</text>
+                <text x="66" y="58" text-anchor="middle" class="node-sub">SOFA &amp; BUNDLE</text></g>
+              <g><circle cx="226" cy="58" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+                <circle cx="226" cy="58" r="3" fill="var(--gold)"/>
+                <text x="226" y="30" text-anchor="middle" class="node-label">ANTIBIOTIC</text>
+                <text x="226" y="42" text-anchor="middle" class="node-sub">PHARMACOLOGY</text></g>
+              <g><circle cx="360" cy="52" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+                <circle cx="360" cy="52" r="3" fill="var(--gold)"/>
+                <text x="360" y="24" text-anchor="middle" class="node-label">GUIDELINE SURV.</text>
+                <text x="360" y="36" text-anchor="middle" class="node-sub">LITERATURE WATCH</text></g>
+              <g><circle cx="494" cy="64" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+                <circle cx="494" cy="64" r="3" fill="var(--gold)"/>
+                <text x="494" y="36" text-anchor="middle" class="node-label">GOVERNANCE</text>
+                <text x="494" y="48" text-anchor="middle" class="node-sub">AUDIT &amp; SIGN-OFF</text></g>
+              <g><circle cx="634" cy="80" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+                <circle cx="634" cy="80" r="3" fill="var(--gold)"/>
+                <text x="634" y="52" text-anchor="middle" class="node-label">MEMORY</text>
+                <text x="634" y="64" text-anchor="middle" class="node-sub">PATIENT CONTEXT</text></g>
+            </g>
+
+            <g fill="var(--teal)" filter="url(#softGlow)">
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="0s"><mpath href="#ch1"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="0.65s"><mpath href="#ch2"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="1.3s"><mpath href="#ch3"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="1.95s"><mpath href="#ch4"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="2.6s"><mpath href="#ch5"/></animateMotion></circle>
+            </g>
+
+            <circle cx="360" cy="400" r="8" fill="none" stroke="var(--teal)" stroke-width="1.5" opacity="0.9">
+              <animate attributeName="r" values="8;30" dur="2.6s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0.2 0.6 0.4 1"/>
+              <animate attributeName="opacity" values="0.85;0" dur="2.6s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0.2 0.6 0.4 1"/>
+            </circle>
+            <circle cx="360" cy="400" r="10" fill="var(--teal)" opacity="0.22"/>
+            <circle cx="360" cy="400" r="5" fill="var(--teal)" filter="url(#softGlow)"/>
+            <text x="360" y="432" text-anchor="middle" class="mono basin-label">PHYSICIAN DECIDES</text>
+          </svg>
+
+          <div class="wordmark-block">
+            <div class="wordmark display"><span class="w1">Sepsis</span> <span class="w2">Bundle</span></div>
+            <div class="subtitle">ICU Clinical Decision Support</div>
+            <div class="tag-divider"><div class="line"></div><div class="dot-gold"></div><div class="line right"></div></div>
+            <div class="tagline mono">AGENTS <span class="arrow">&rarr;</span> ONE CHANNEL <span class="arrow">&rarr;</span> PHYSICIAN &middot; AI PROPOSES</div>
+          </div>
+        </div>
+
+        <div class="bottom-row mono">
+          <div>GOVERNANCE-AUDITED &middot; MEMORY-INFORMED</div>
+          <div>v2026.08</div>
+        </div>
       </div>
 
-      <div class="wordmark-block">
-        <div class="wordmark display"><span class="w1">Sepsis</span> <span class="w2">Bundle</span></div>
-        <div class="subtitle">ICU Clinical Decision Support</div>
-        <div class="tag-divider"><div class="line"></div><div class="dot-gold"></div><div class="line right"></div></div>
-        <div class="tagline mono">AGENTS <span class="arrow">&rarr;</span> ONE CHANNEL <span class="arrow">&rarr;</span> PHYSICIAN &middot; AI PROPOSES</div>
-      </div>
+      <div class="login-auth">
+        <div class="login-auth-card">
+          <span class="eyebrow mono">ACCESS</span>
+          <h1 class="display">Sign in</h1>
 
-      <div id="firstRunNotice" class="alert hidden" style="border-color:rgba(45,212,191,.35);background:rgba(45,212,191,.06);color:var(--teal)">No account exists yet — create the first one below.</div>
+          <div id="firstRunNotice" class="alert hidden" style="border-color:rgba(45,212,191,.35);background:rgba(45,212,191,.06);color:var(--teal)">No account exists yet — create the first one below.</div>
 
-      <form id="loginForm" class="login-form">
-        <label>Username<input name="username" required autocomplete="username" /></label>
-        <label>Password<input type="password" name="password" required autocomplete="current-password" minlength="8" /></label>
-        <div id="loginError" class="alert error hidden"></div>
-        <button class="primary" type="submit" style="width:100%;justify-content:center"><span id="loginBtnLabel">Log in</span></button>
-      </form>
-
-      <div class="bottom-row mono">
-        <div>GOVERNANCE-AUDITED &middot; MEMORY-INFORMED</div>
-        <div>v2026.08</div>
+          <form id="loginForm" class="login-form">
+            <label>Username<input name="username" required autocomplete="username" /></label>
+            <label>Password<input type="password" name="password" required autocomplete="current-password" minlength="8" /></label>
+            <div id="loginError" class="alert error hidden"></div>
+            <button class="primary" type="submit" style="width:100%;justify-content:center"><span id="loginBtnLabel">Log in</span></button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
