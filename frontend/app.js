@@ -187,7 +187,10 @@ $('#deescalateForm').addEventListener('submit', async e=>{
       documented_allergies: form.elements.de_allergies.value.split(';').map(x=>x.trim()).filter(Boolean),
     };
     const data=await api('/deescalate',{method:'POST',body:JSON.stringify(payload)});
-    const d=data.deescalation; const g=data.governance;
+    // data.deescalation is the whole AntibioticResponse; the actual
+    // DeescalationAdvice (resistant_alert, narrower_regimen, etc.) is
+    // nested one level deeper, under its own `.deescalation` field.
+    const outer=data.deescalation; const d=outer ? outer.deescalation : null; const g=data.governance;
     resultEl.classList.remove('hidden');
     const govLine = g ? `<div class="rs-section"><span class="status-pill ${(g.status||'').toLowerCase()}">${escapeHtml(g.status||'')}</span> <small style="color:var(--muted)">KB ${escapeHtml(g.kb_version||'—')}</small></div>` : '';
     let body;
