@@ -111,11 +111,14 @@ class MemoryAnalyticsAgent:
                 "antibiotic_governance_block_rate": None,
                 "mean_sofa": None,
                 "missing_input_rate": None,
+                "governance_pass_count": 0,
+                "governance_blocked_count": 0,
             }
 
         sofa_values = [r.sofa_total for r in records if r.sofa_total is not None]
         shock = sum(r.severity == "septic_shock" for r in records)
         blocked = sum(r.antibiotic_governance_status == "BLOCK" for r in records)
+        passed = sum(r.antibiotic_governance_status == "PASS" for r in records)
         missing = sum(bool(r.missing_inputs) for r in records)
 
         return {
@@ -124,4 +127,10 @@ class MemoryAnalyticsAgent:
             "antibiotic_governance_block_rate": blocked / len(records),
             "mean_sofa": mean(sofa_values) if sofa_values else None,
             "missing_input_rate": missing / len(records),
+            # Explicit counts alongside the rates above — the frontend
+            # displays raw counts next to case_count, not rates, so these
+            # are provided directly rather than making the UI recompute
+            # (count = rate * case_count) from a rate field.
+            "governance_pass_count": passed,
+            "governance_blocked_count": blocked,
         }
