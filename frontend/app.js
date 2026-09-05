@@ -80,7 +80,7 @@ function showView(name){
   $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
   const titles={assessment:'Clinical Assessment',governance:'Governance',memory:'Memory & Analytics',architecture:'Five-Agent System',guidelines:'Antibiotic Guidelines'};
   $('#pageTitle').textContent=titles[name]||'Clinical Assessment';
-  if(name==='memory') loadAnalytics();
+  if(name==='memory'){ loadAnalytics(); loadPatterns(); }
   if(name==='governance') loadAudit();
   if(name==='guidelines') loadGuidelines();
 }
@@ -101,7 +101,8 @@ $('#assessmentForm').addEventListener('submit',async e=>{
   }
   const payload={case_id:form.elements.case_id.value.trim(),patient_id:form.elements.patient_id.value.trim(),severity:form.elements.severity.value,suspected_source:form.elements.suspected_source.value,
     pao2_fio2:optionalNumber(form,'pao2_fio2'),platelets:optionalNumber(form,'platelets'),bilirubin:optionalNumber(form,'bilirubin'),map_mmhg:optionalNumber(form,'map_mmhg'),gcs:optionalNumber(form,'gcs'),creatinine:optionalNumber(form,'creatinine'),urine_output_value:optionalNumber(form,'urine_output_value'),urine_output_unit:form.elements.urine_output_unit.value,weight_kg:optionalNumber(form,'weight_kg'),
-    pressor_drug:pressorDrug,pressor_dose:pressorDose,mdr_risk_factors:checked(form,'mdr'),mrsa_risk_factors:checked(form,'mrsa'),anaerobic_risk_factors:checked(form,'anaerobic'),fungal_risk_factors:checked(form,'fungal'),documented_allergies:form.elements.allergies.value.split(';').map(x=>x.trim()).filter(Boolean)};
+    pressor_drug:pressorDrug,pressor_dose:pressorDose,mdr_risk_factors:checked(form,'mdr'),mrsa_risk_factors:checked(form,'mrsa'),anaerobic_risk_factors:checked(form,'anaerobic'),fungal_risk_factors:checked(form,'fungal'),documented_allergies:form.elements.allergies.value.split(';').map(x=>x.trim()).filter(Boolean),
+    mechanical_ventilation:form.elements.mechanical_ventilation.value==='true',central_line_hours:optionalNumber(form,'central_line_hours'),urinary_catheter_hours:optionalNumber(form,'urinary_catheter_hours')};
   try{const data=await api('/assess',{method:'POST',body:JSON.stringify(payload)}); renderResult(data); document.querySelector('[data-view="assessment"]').click(); loadAudit();}
   catch(ex){err.textContent=ex.message;err.classList.remove('hidden')}
   finally{btn.disabled=false;btn.querySelector('span').textContent='Run governed assessment'}
@@ -160,6 +161,34 @@ function extractAnalytics(d){
 }
 $('#refreshAnalytics').addEventListener('click',loadAnalytics);
 
+async function loadPatterns(){
+  const el=$('#patternSignals');
+  try{
+    const d=await api('/analytics/patterns');
+    const clusters=d.organism_clusters||[]; const assocs=d.device_associations||[];
+    if(!clusters.length && !assocs.length){ el.innerHTML='<p class="rs-empty">No pattern signals yet.</p>'; return; }
+    let html='';
+    if(clusters.length){
+      html+=`<div class="rs-section"><h4>Organism clusters</h4>${clusters.map(c=>
+        `<div class="alert" style="border-color:rgba(201,162,39,.4);background:rgba(201,162,39,.06);margin-bottom:8px">
+          <b>${escapeHtml(c.organism)}</b> — ${c.case_count} cases in the last ${c.window_hours}h
+          <div style="margin-top:4px"><small style="color:var(--muted)">Cases: ${c.case_ids.map(escapeHtml).join(', ')}</small></div>
+        </div>`).join('')}</div>`;
+    }
+    if(assocs.length){
+      html+=`<div class="rs-section"><h4>Device-association hypotheses</h4>${assocs.map(a=>
+        `<div class="alert error" style="margin-bottom:8px">
+          <b>⚠ ${escapeHtml(a.matching_case_count)}/${escapeHtml(a.total_organism_case_count)}</b> ${escapeHtml(a.organism)} cases shared <b>${escapeHtml(a.device)}</b>${a.threshold_hours?` &gt; ${a.threshold_hours}h`:''} — possible common source, needs infection-control review.
+          <div style="margin-top:4px"><small style="color:var(--muted)">Cases: ${a.case_ids.map(escapeHtml).join(', ')}</small></div>
+        </div>`).join('')}</div>`;
+    }
+    el.innerHTML=html;
+  }catch(e){
+    el.textContent='Pattern signals unavailable: '+e.message;
+  }
+}
+$('#refreshPatterns').addEventListener('click',loadPatterns);
+
 async function health(){try{const d=await api('/health');$('#healthStatus').textContent='SYSTEM — ONLINE';$('#kbVersion').textContent=`KB — ${d.active_kb_version||'none'}`}catch{$('#healthStatus').textContent='SYSTEM — OFFLINE';$('#kbVersion').textContent='KB — unavailable'}}
 function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 health();
@@ -182,6 +211,7 @@ $('#deescalateForm').addEventListener('submit', async e=>{
     if(Object.keys(sensitivities).length===0) throw new Error('Enter at least one "Drug: S/I/R" line.');
     const payload={
       case_id: form.elements.de_case_id.value.trim(),
+      patient_id: form.elements.de_patient_id.value.trim() || null,
       severity: form.elements.de_severity.value,
       suspected_source: form.elements.de_suspected_source.value,
       current_regimen_drug_names: form.elements.de_current_regimen.value.split(',').map(x=>x.trim()).filter(Boolean),
