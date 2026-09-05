@@ -139,6 +139,12 @@ class AssessRequest(BaseModel):
     anaerobic_risk_factors: list[str] = []
     fungal_risk_factors: list[str] = []
     documented_allergies: list[str] = []
+    # Device exposures — used only for Memory Agent pattern signals
+    # (organism clustering / device-association hypotheses); never affects
+    # the SOFA score or the antibiotic recommendation.
+    mechanical_ventilation: bool = False
+    central_line_hours: float | None = None
+    urinary_catheter_hours: float | None = None
 
 class SensitivityMap(BaseModel):
     organism: str
@@ -146,6 +152,7 @@ class SensitivityMap(BaseModel):
 
 class DeescalateRequest(BaseModel):
     case_id: str
+    patient_id: str | None = None  # links the culture result back to the same patient for pattern detection
     severity: Severity
     suspected_source: SuspectedSource
     current_regimen_drug_names: list[str]  # what the patient is on right now
@@ -160,6 +167,13 @@ def health():
 @app.get("/analytics")
 def analytics(user: dict = Depends(require_auth)):
     return memory_agent.aggregate()
+
+@app.get("/analytics/patterns")
+def analytics_patterns(user: dict = Depends(require_auth)):
+    """Outbreak-style pattern signals — organism clusters and device-exposure
+    associations. Statistical flags for infection-control/epidemiologist
+    review, never a causal diagnosis."""
+    return memory_agent.pattern_signals()
 
 @app.get("/audit")
 def audit(limit: int = 25, case_id: str | None = None, user: dict = Depends(require_auth)):
@@ -234,6 +248,8 @@ async def deescalate(req: DeescalateRequest, user: dict = Depends(require_auth))
         onset_timestamp=now,
         creatinine_mg_dl=req.creatinine,
         documented_allergies=req.documented_allergies,
+        patient_id=req.patient_id,
+        memory_agent=memory_agent, memory_secret=MEMORY_SECRET,
     )
     return result
 
@@ -280,6 +296,11 @@ async def assess(req: AssessRequest, user: dict = Depends(require_auth)):
                 anaerobic_risk_factors=req.anaerobic_risk_factors,
                 fungal_risk_factors=req.fungal_risk_factors,
             ), documented_allergies=req.documented_allergies,
+            device_exposures={
+                "mechanical_ventilation": req.mechanical_ventilation,
+                "central_line_hours": req.central_line_hours,
+                "urinary_catheter_hours": req.urinary_catheter_hours,
+            },
             memory_agent=memory_agent, memory_secret=MEMORY_SECRET,
         )
         result["urine_output_note"] = urine_note if urine_24h is not None else None
@@ -288,4 +309,3 @@ async def assess(req: AssessRequest, user: dict = Depends(require_auth)):
         return result
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
-
