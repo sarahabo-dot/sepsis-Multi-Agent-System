@@ -170,6 +170,13 @@
                 <label>Urine output type<select name="urine_output_unit"><option value="ml_24h" selected>Measured 24h total (mL)</option><option value="ml_kg_hr">Rate (mL/kg/hr) — estimate</option></select></label>
                 <label>Weight (kg)<input type="number" step="0.1" name="weight_kg" min="0" placeholder="optional" /></label>
               </div>
+
+              <p class="section-kicker mono" style="margin-top:18px">DEVICE EXPOSURE <small style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— for Memory Agent pattern signals only, does not affect SOFA or antibiotic choice</small></p>
+              <div class="form-grid">
+                <label>Mechanical ventilation<select name="mechanical_ventilation"><option value="false" selected>No</option><option value="true">Yes</option></select></label>
+                <label>Central line duration (hours)<input type="number" step="1" name="central_line_hours" min="0" placeholder="optional" /></label>
+                <label>Urinary catheter duration (hours)<input type="number" step="1" name="urinary_catheter_hours" min="0" placeholder="optional" /></label>
+              </div>
               <div class="subhead">Risk modifiers</div>
               <div class="checks">
                 <label><input type="checkbox" name="mdr" value="prior_mdr_colonization" /> MDR risk</label>
@@ -212,6 +219,7 @@
           <form id="deescalateForm">
             <div class="form-grid">
               <label>Case ID<input name="de_case_id" placeholder="same as above" required /></label>
+              <label>Patient ID<small style="color:var(--muted);font-weight:400"> — links this culture result to the patient for pattern detection</small><input name="de_patient_id" placeholder="same as above assessment" /></label>
               <label>Severity<select name="de_severity"><option value="sepsis">Sepsis</option><option value="septic_shock" selected>Septic shock</option></select></label>
               <label>Suspected source<select name="de_suspected_source"><option value="urinary">Urinary</option><option value="respiratory">Respiratory</option><option value="abdominal">Abdominal</option><option value="skin_soft_tissue">Skin / soft tissue</option><option value="cns">CNS</option><option value="undifferentiated">Undifferentiated</option></select></label>
               <label>Current regimen drug(s)<input name="de_current_regimen" placeholder="e.g. Piperacillin-tazobactam" required /></label>
@@ -246,6 +254,12 @@ Meropenem: S" required></textarea></label>
         <div class="page-intro"><span class="section-kicker mono">AGENT 05</span><h2>Memory & Clinical Analytics</h2><p>Only aggregate, de-identified metrics are displayed here. Patient identifiers are not rendered in the analytics dashboard.</p></div>
         <div id="analyticsCards" class="stats-grid"><div class="stat-card"><span>Cases</span><strong>—</strong></div><div class="stat-card"><span>Governance pass</span><strong>—</strong></div><div class="stat-card"><span>Blocked</span><strong>—</strong></div><div class="stat-card"><span>Mean SOFA</span><strong>—</strong></div></div>
         <div class="panel analytics-table"><div class="panel-head"><div><span class="section-kicker mono">AGGREGATE VIEW</span><h2>System memory</h2></div><button class="ghost" id="refreshAnalytics">Refresh</button></div><pre id="analyticsRaw">Loading analytics…</pre></div>
+
+        <div class="panel readable-summary" style="margin-top:18px">
+          <div class="panel-head"><div><span class="section-kicker mono">PATTERN SIGNALS — DETERMINISTIC, NOT LLM-GENERATED</span><h2>Outbreak &amp; device-association flags</h2></div><button class="ghost" id="refreshPatterns">Refresh</button></div>
+          <p style="margin-bottom:14px">Statistical co-occurrence flags for infection-control / epidemiologist review — never a causal diagnosis, and not scoped by ward or unit. Requires a culture organism recorded via the De-escalate form to appear.</p>
+          <div id="patternSignals">Loading…</div>
+        </div>
       </section>
 
       <section id="architecture" class="view">
