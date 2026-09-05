@@ -152,7 +152,10 @@ async function loadAnalytics(){
   catch(e){$('#analyticsRaw').textContent='Analytics unavailable: '+e.message}
 }
 function extractAnalytics(d){
-  const n=d.total_cases??d.case_count??d.cases??'—', pass=d.governance_pass??d.passed??'—', block=d.governance_blocked??d.blocked??'—', sofa=d.mean_sofa??d.average_sofa??'—';
+  const n=d.case_count??d.total_cases??d.cases??'—';
+  const pass=d.governance_pass_count??'—';
+  const block=d.governance_blocked_count??'—';
+  const sofa=(d.mean_sofa!=null)?Math.round(d.mean_sofa*10)/10:'—';
   return [['Cases',n],['Governance pass',pass],['Blocked',block],['Mean SOFA',sofa]];
 }
 $('#refreshAnalytics').addEventListener('click',loadAnalytics);
