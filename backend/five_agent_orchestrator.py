@@ -68,6 +68,7 @@ async def assess_case(
     onset_timestamp: datetime,
     risk_factors: Optional[RiskFactors] = None,
     documented_allergies: Optional[list[str]] = None,
+    device_exposures: Optional[dict] = None,
     memory_agent: Optional[MemoryAnalyticsAgent] = None,
     memory_secret: Optional[str] = None,
 ):
@@ -164,6 +165,7 @@ async def assess_case(
                 missing_inputs=(
                     trusted_antibiotic.missing_inputs if trusted_antibiotic else []
                 ),
+                device_exposures=device_exposures or {},
             )
         )
 
@@ -187,6 +189,9 @@ async def deescalate_case(
     onset_timestamp: datetime,
     creatinine_mg_dl: Optional[float] = None,
     documented_allergies: Optional[list[str]] = None,
+    patient_id: Optional[str] = None,
+    memory_agent: Optional[MemoryAnalyticsAgent] = None,
+    memory_secret: Optional[str] = None,
 ) -> dict:
     """De-escalation path: a culture result has come back for a case already
     on an empirical regimen. Runs the same governance boundary as the
@@ -227,6 +232,16 @@ async def deescalate_case(
         },
     )
 
+    # The organism itself is a lab fact, not a governed recommendation — it's
+    # recorded for pattern detection (Memory Agent) regardless of whether the
+    # de-escalation *suggestion* passed governance.
+    if memory_agent is not None and memory_secret and patient_id:
+        memory_agent.record_culture_result(
+            case_id=case_id,
+            patient_key=pseudonymize_patient_id(patient_id, memory_secret),
+            organism=culture_result.organism,
+        )
+
     return {
         "case_id": case_id,
         "deescalation": trusted_response,
@@ -234,4 +249,3 @@ async def deescalate_case(
         "error": error,
         "governance": governance,
     }
-
