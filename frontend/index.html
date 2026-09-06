@@ -260,17 +260,60 @@ Meropenem: S" required></textarea></label>
           <p style="margin-bottom:14px">Statistical co-occurrence flags for infection-control / epidemiologist review — never a causal diagnosis, and not scoped by ward or unit. Requires a culture organism recorded via the De-escalate form to appear.</p>
           <div id="patternSignals">Loading…</div>
         </div>
+
+        <div class="panel readable-summary" style="margin-top:18px">
+          <div class="panel-head"><div><span class="section-kicker mono">AI-NARRATED, DATA-BOUNDED</span><h2>Insights briefing</h2></div><button class="primary" id="genInsights"><span>Generate briefing</span></button></div>
+          <p style="margin-bottom:14px">The narrative below can only describe numbers already computed in the statistics panel — it never adds a fact, count, or cause that isn't already there.</p>
+          <div id="insightsNarrative" class="rs-empty">Not generated yet.</div>
+          <details style="margin-top:12px"><summary>View full statistics (audit / developer)</summary><pre id="insightsStats"></pre></details>
+        </div>
       </section>
 
       <section id="architecture" class="view">
-        <div class="page-intro"><span class="section-kicker mono">ACEQUIA MODEL · v0.1</span><h2>Five-agent architecture</h2><p>Independent agents converge through a governed channel. The system is designed around provenance, deterministic clinical rules, controlled memory, and explicit physician authority.</p></div>
-        <div class="architecture-canvas">
-          <div class="arch-agent a1"><b>01</b><strong>SEPSIS BUNDLE</strong><small>SOFA / orchestration</small></div>
-          <div class="arch-agent a2"><b>02</b><strong>ANTIBIOTIC</strong><small>regimen + dosing</small></div>
-          <div class="arch-agent a3"><b>03</b><strong>GUIDELINE SURVEILLANCE</strong><small>licensed sources / review</small></div>
-          <div class="arch-agent a4"><b>04</b><strong>GOVERNANCE</strong><small>validation / audit</small></div>
-          <div class="arch-agent a5"><b>05</b><strong>MEMORY</strong><small>longitudinal analytics</small></div>
-          <div class="arch-basin"><strong>PHYSICIAN DECIDES</strong><small>One decision point · no autonomous treatment</small></div>
+        <div class="page-intro"><span class="section-kicker mono">ACEQUIA MODEL · v0.1</span><h2>Five-agent architecture</h2><p>Independent agents converge through a governed channel — the same design carried through from the login screen. The system is designed around provenance, deterministic clinical rules, controlled memory, and explicit physician authority.</p></div>
+        <div class="architecture-canvas acequia-canvas">
+          <svg class="canvas" viewBox="0 0 700 470" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="flowFadeArch" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.22"/>
+                <stop offset="70%" stop-color="var(--gold)" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="var(--gold)" stop-opacity="0.85"/>
+              </linearGradient>
+              <filter id="softGlowArch" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="2.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="basinGlowArch" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="6"/></filter>
+            </defs>
+            <circle cx="360" cy="400" r="46" fill="var(--teal)" opacity="0.10" filter="url(#basinGlowArch)"/>
+            <g fill="none" stroke="url(#flowFadeArch)" stroke-width="1.4" filter="url(#softGlowArch)">
+              <path id="arch-ch1" d="M66,74 C 126,152 176,266 332,388"/>
+              <path id="arch-ch2" d="M226,58 C 258,152 298,266 347,383"/>
+              <path id="arch-ch3" d="M360,52 C 360,152 358,266 360,386"/>
+              <path id="arch-ch4" d="M494,64 C 452,152 412,266 373,383"/>
+              <path id="arch-ch5" d="M634,80 C 552,158 442,266 388,388"/>
+            </g>
+            <g class="mono">
+              <g><circle cx="66" cy="74" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/><circle cx="66" cy="74" r="3" fill="var(--gold)"/><text x="66" y="46" text-anchor="middle" class="node-label">SEPSIS BUNDLE</text><text x="66" y="58" text-anchor="middle" class="node-sub">SOFA &amp; BUNDLE</text></g>
+              <g><circle cx="226" cy="58" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/><circle cx="226" cy="58" r="3" fill="var(--gold)"/><text x="226" y="30" text-anchor="middle" class="node-label">ANTIBIOTIC</text><text x="226" y="42" text-anchor="middle" class="node-sub">REGIMEN + DOSING</text></g>
+              <g><circle cx="360" cy="52" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/><circle cx="360" cy="52" r="3" fill="var(--gold)"/><text x="360" y="24" text-anchor="middle" class="node-label">GUIDELINE SURV.</text><text x="360" y="36" text-anchor="middle" class="node-sub">LICENSED SOURCES</text></g>
+              <g><circle cx="494" cy="64" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/><circle cx="494" cy="64" r="3" fill="var(--gold)"/><text x="494" y="36" text-anchor="middle" class="node-label">GOVERNANCE</text><text x="494" y="48" text-anchor="middle" class="node-sub">VALIDATION / AUDIT</text></g>
+              <g><circle cx="634" cy="80" r="7" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.5"/><circle cx="634" cy="80" r="3" fill="var(--gold)"/><text x="634" y="52" text-anchor="middle" class="node-label">MEMORY</text><text x="634" y="64" text-anchor="middle" class="node-sub">LONGITUDINAL ANALYTICS</text></g>
+            </g>
+            <g fill="var(--teal)" filter="url(#softGlowArch)">
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="0s"><mpath href="#arch-ch1"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="0.65s"><mpath href="#arch-ch2"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="1.3s"><mpath href="#arch-ch3"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="1.95s"><mpath href="#arch-ch4"/></animateMotion></circle>
+              <circle r="2.4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="2.6s"><mpath href="#arch-ch5"/></animateMotion></circle>
+            </g>
+            <circle cx="360" cy="400" r="8" fill="none" stroke="var(--teal)" stroke-width="1.5" opacity="0.9">
+              <animate attributeName="r" values="8;30" dur="2.6s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0.2 0.6 0.4 1"/>
+              <animate attributeName="opacity" values="0.85;0" dur="2.6s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0.2 0.6 0.4 1"/>
+            </circle>
+            <circle cx="360" cy="400" r="10" fill="var(--teal)" opacity="0.22"/>
+            <circle cx="360" cy="400" r="5" fill="var(--teal)" filter="url(#softGlowArch)"/>
+            <text x="360" y="432" text-anchor="middle" class="mono basin-label">PHYSICIAN DECIDES</text>
+          </svg>
         </div>
       </section>
 
